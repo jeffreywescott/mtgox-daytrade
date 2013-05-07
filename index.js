@@ -24,7 +24,9 @@ var MtGoxStreamHandler = {
         this.ticker(data);
         break;
       default:
-        console.log(data.op+"/"+data.private+" (ignored)");
+        if (data.private != 'depth') {
+          console.log(data.op+"/"+data.private+" (ignored)");
+        }
         break;
     }
   },
