@@ -1,6 +1,7 @@
 var redis = require('redis');
 
-var MtGoxStreamHandler = function(io) {
+var MtGoxStreamHandler = function(mtGoxClient, io) {
+  this.mtGoxClient = mtGoxClient;
   this.io = io;
 }
 

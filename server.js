@@ -21,13 +21,14 @@ app.get('/', function (req, res) {
 
 // set up the MtGox client and handler
 var mtGoxClient = new mtgox.MtGox(process.env.MTGOX_API_KEY, process.env.MTGOX_API_SECRET);
-var mtGoxHandler = new handler.MtGoxStreamHandler(io);
+var mtGoxHandler = new handler.MtGoxStreamHandler(mtGoxClient, io);
 mtGoxClient.unsubscribe('depth');
 mtGoxClient.unsubscribe('trade');
-//mtGox.unsubscribe('ticker');
-// mtGox.authEmit({
+// mtGoxClient.unsubscribe('ticker');
+// mtGoxClient.authEmit({
 //   call: 'private/info'
 // });
+
 mtGoxClient.onMessage(function(data) {
   if (data.op in mtGoxHandler && typeof mtGoxHandler[data.op] === 'function') {
     mtGoxHandler[data.op](data);
