@@ -1,6 +1,6 @@
 {
   "name": "mtgox-daytrade",
-  "version": "0.1.9",
+  "version": "0.1.14",
   "description": "Mt. Gox (Bitcoin Exchange) Streaming API Client",
   "main": "index.js",
   "scripts": {

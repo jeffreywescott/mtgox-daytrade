@@ -7,28 +7,53 @@
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800" rel="stylesheet" type="text/css">
 
     <style>
+      /* MOBILE FIRST! */
       body {
-        font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        width: 80%;
+        width: 95%;
         margin: 0 auto;
+        font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        color: white;
+        background: black;
       }
 
       div#lasttick {
+        font-size: 20pt;
         width: 100%;
         font-weight: bold;
-        font-size: 40pt;
         text-align: center;
       }
 
       ul#ticks {
-        columns: 100px 3;
-        -webkit-columns: 100px 3;
-        -moz-columns: 100px 3;
+        width: 60%;
+        margin: 0 auto;
       }
 
       ul#ticks li {
         list-style-type: none;
       }
+
+      span.price {
+        color: blue;
+      }
+
+      /* DESKTOP  / TABLET */
+      @media (min-width:500px) {
+        body {
+          width: 80%;
+          margin: 0 auto;
+        }
+
+        div#lasttick {
+          font-size: 40pt;
+        }
+
+        ul#ticks {
+          width: 80%;
+          columns: 100px 3;
+          -webkit-columns: 100px 3;
+          -moz-columns: 100px 3;
+        }
+      }      
     </style>
   </head>
   <body>
@@ -37,17 +62,20 @@
     <ul id="ticks">
     </ul>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       var socket = io.connect(window.location);
       socket.on('tick', function (data) {
         // update the DOM -- keep last 100 ticks
+        var $ticksList = $('ul#ticks');
+        var $lastTickDiv = $('#lasttick');
         var template = '1 BTC = USD $<span></span>';
-        var prevTick = parseFloat($('#lasttick span').text().substring(1));
+        var prevTick = parseFloat($lastTickDiv.find('span.price').text().substring(1)); // remove $
         var currTick = parseFloat(data.v);
-        $('ul#ticks').prepend('<li>' + $('#lasttick').html() + '</li>');
-        $('#lasttick').html('1 BTC = USD <span>$' + data.v + '</span>');
-        var tickColor = 'black';
+        $ticksList.prepend('<li>' + $lastTickDiv.html() + '</li>');
+        $lastTickDiv.html('1 BTC = USD <span class="price">$' + data.v + '</span>');
+        var tickColor = 'blue';
         if (prevTick) {
           if (currTick > prevTick) {
             tickColor = 'green';
@@ -55,9 +83,9 @@
             tickColor = 'red';
           }
         }
-        $('#lasttick span').css('color', tickColor);
-        $('ul#ticks li:first').html();
-        $('ul#ticks li:gt(' + 98 + ')').remove();
+        $lastTickDiv.find('span.price').css('color', tickColor);
+        if (tickColor != 'blue') { $lastTickDiv.find('span.price').effect("highlight", {}, 500); }
+        $ticksList.find('li:gt(' + 98 + ')').remove();
       });
     </script>
   </body>
