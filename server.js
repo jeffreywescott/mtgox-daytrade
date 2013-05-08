@@ -43,7 +43,7 @@ var saveTick = function(dp) {
       });
     }
     redisClient.lpush("mtgox:ticks", JSON.stringify(dp));
-    redisClient.ltrim("mtgox:ticks", 0, 32767);
+    redisClient.ltrim("mtgox:ticks", 0, 25000);
   }
 }
 
