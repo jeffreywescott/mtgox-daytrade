@@ -1,6 +1,6 @@
 {
   "name": "mtgox-daytrade",
-  "version": "0.1.0-1",
+  "version": "0.1.9",
   "description": "Mt. Gox (Bitcoin Exchange) Streaming API Client",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,9 @@
   "author": "Jeffrey Wescott",
   "dependencies": {
     "node-mtgox-client-streaming": "0.1.0",
-    "redis": "0.8.3"
+    "redis": "0.8.3",
+    "express": "3.2.3",
+    "socket.io": "0.9.14"
   },
   "license": "MIT",
   "subdomain": "mtgox-daytrade",
