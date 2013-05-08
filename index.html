@@ -16,24 +16,33 @@
         background: black;
       }
 
-      div#lasttick {
+      h1 {
+        color: yellow;
         font-size: 20pt;
         width: 100%;
-        font-weight: bold;
         text-align: center;
       }
 
-      ul#ticks {
-        width: 60%;
-        margin: 0 auto;
+      h2 {
+        font-size: 16pt;
+        width: 100%;
+        text-align: center;
       }
 
-      ul#ticks li {
+      ul#prices {
+        margin: 0 auto;
+        width: 80%;
+        columns: 100px 2;
+        -webkit-columns: 100px 2;
+        -moz-columns: 100px 2;
+      }
+
+      ul#prices li {
         list-style-type: none;
       }
 
       span.price {
-        color: blue;
+        color: aqua;
       }
 
       /* DESKTOP  / TABLET */
@@ -43,23 +52,31 @@
           margin: 0 auto;
         }
 
-        div#lasttick {
+        h1 {
           font-size: 40pt;
         }
 
-        ul#ticks {
-          width: 80%;
-          columns: 100px 3;
-          -webkit-columns: 100px 3;
-          -moz-columns: 100px 3;
+        h2 {
+          font-size: 32pt;
+        }
+
+        div#curr-price {
+          font-size: 40pt;
+        }
+
+        ul#prices {
+          columns: 100px 5;
+          -webkit-columns: 100px 5;
+          -moz-columns: 100px 5;
         }
       }      
     </style>
   </head>
   <body>
-    <div id="lasttick">
-    </div>
-    <ul id="ticks">
+    <h1>BTC vs USD</h1>
+    <h2 id="curr-price">
+    </h2>
+    <ul id="prices">
     </ul>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
@@ -67,25 +84,31 @@
     <script>
       var socket = io.connect(window.location);
       socket.on('tick', function (data) {
-        // update the DOM -- keep last 100 ticks
-        var $ticksList = $('ul#ticks');
-        var $lastTickDiv = $('#lasttick');
-        var template = '1 BTC = USD $<span></span>';
-        var prevTick = parseFloat($lastTickDiv.find('span.price').text().substring(1)); // remove $
-        var currTick = parseFloat(data.v);
-        $ticksList.prepend('<li>' + $lastTickDiv.html() + '</li>');
-        $lastTickDiv.html('1 BTC = USD <span class="price">$' + data.v + '</span>');
-        var tickColor = 'blue';
-        if (prevTick) {
-          if (currTick > prevTick) {
-            tickColor = 'green';
-          } else if (currTick < prevTick) {
-            tickColor = 'red';
+        var $currPriceDiv = $('#curr-price');
+        var $currPriceSpan = $currPriceDiv.find('span.price');
+        var $pricesList = $('ul#prices');
+        var prevPrice = parseFloat($currPriceSpan.text().substring(1)); // remove $
+        var prevColor = $currPriceSpan.css('color');
+        var currPrice = parseFloat(data.v);
+        var priceTemplate = '<span class="price"></span>';
+        var currColor = 'aqua';
+        if (prevPrice) {
+          if (currPrice > prevPrice) {
+            currColor = 'green';
+          } else if (currPrice < prevPrice) {
+            currColor = 'red';
           }
         }
-        $lastTickDiv.find('span.price').css('color', tickColor);
-        if (tickColor != 'blue') { $lastTickDiv.find('span.price').effect("highlight", {}, 500); }
-        $ticksList.find('li:gt(' + 98 + ')').remove();
+
+        // put the previous price into the price list, update the current price, and colorize / highlight as necessary
+        if (prevPrice) {
+          $pricesList.prepend('<li>' + priceTemplate + '</li>').find('li:first span.price').html('$' + prevPrice).css('color', prevColor);
+        }
+        $currPriceDiv.html(priceTemplate).find('span.price').html('$' + currPrice).css('color', currColor);
+        if (currColor != 'aqua') { $currPriceDiv.find('span.price').effect("highlight", {}, 500); }
+
+        // prune the list to 100 items (which works well for both 2 and 5 columns)
+        $pricesList.find('li:gt(' + 99 + ')').remove();
       });
     </script>
   </body>
