@@ -1,15 +1,21 @@
 {
-  "name": "node-mtgox-client-streaming",
-  "version": "0.1.0",
+  "name": "mtgox-daytrade",
+  "version": "0.1.0-1",
   "description": "Mt. Gox (Bitcoin Exchange) Streaming API Client",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
-  "repository": "",
+  "repository": "https://github.com/binaryfeed/mtgox-daytrade.git",
   "author": "Jeffrey Wescott",
-  "dependencies" : {
-    "node-mtgox-client-streaming" : "0.1.0"
+  "dependencies": {
+    "node-mtgox-client-streaming": "0.1.0",
+    "redis": "0.8.3"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "subdomain": "mtgox-daytrade",
+  "engines": {
+    "node": "0.8.x"
+  }
 }
