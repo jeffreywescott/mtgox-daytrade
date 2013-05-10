@@ -29,6 +29,13 @@
         text-align: center;
       }
 
+      h3 {
+        font-size: 12pt;
+        font-weight: normal;
+        width: 100%;
+        text-align: center;
+      }
+
       ul#prices {
         margin: 0 auto;
         width: 80%;
@@ -60,6 +67,10 @@
           font-size: 32pt;
         }
 
+        h3 {
+          font-size: 16pt;
+        }
+
         div#curr-price {
           font-size: 40pt;
         }
@@ -76,6 +87,8 @@
     <h1>BTC vs USD</h1>
     <h2 id="curr-price">
     </h2>
+    <h3 id="mean-stddev">
+    </h3>
     <ul id="prices">
     </ul>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
@@ -84,12 +97,15 @@
     <script>
       var socket = io.connect(window.location);
       socket.on('tick', function (data) {
-        var $currPriceDiv = $('#curr-price');
-        var $currPriceSpan = $currPriceDiv.find('span.price');
+        var $currPriceH1 = $('#curr-price');
+        var $meanStdDevDiv = $('#mean-stddev');
+        var $currPriceSpan = $currPriceH1.find('span.price');
         var $pricesList = $('ul#prices');
         var prevPrice = parseFloat($currPriceSpan.text().substring(1)); // remove $
         var prevColor = $currPriceSpan.css('color');
         var currPrice = parseFloat(data.v);
+        var mean = parseFloat(data.mean);
+        var stdDev = parseFloat(data.stdDev);
         var priceTemplate = '<span class="price"></span>';
         var currColor = 'aqua';
         if (prevPrice) {
@@ -104,8 +120,9 @@
         if (prevPrice) {
           $pricesList.prepend('<li>' + priceTemplate + '</li>').find('li:first span.price').html('$' + prevPrice).css('color', prevColor);
         }
-        $currPriceDiv.html(priceTemplate).find('span.price').html('$' + currPrice).css('color', currColor);
-        if (currColor != 'aqua') { $currPriceDiv.find('span.price').effect("highlight", {}, 500); }
+        $currPriceH1.html(priceTemplate).find('span.price').html('$' + currPrice).css('color', currColor);
+        $meanStdDevDiv.html('($' + mean + ' +/- $' + stdDev + ')');
+        if (currColor != 'aqua') { $currPriceH1.find('span.price').effect("highlight", {}, 500); }
 
         // prune the list to 100 items (which works well for both 2 and 5 columns)
         $pricesList.find('li:gt(' + 99 + ')').remove();
