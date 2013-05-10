@@ -1,4 +1,73 @@
 $(document).ready(function () {
+
+  // draw chart
+  var data = usdeur.splice(0, 500);
+  $('#chart').highcharts('StockChart', {
+    chart: {
+      backgroundColor: "#222",
+      shadow: true
+    },
+
+    colors: [
+      "aqua",
+      "fuchsia",
+      "blue",
+      "white",
+      "teal",
+      "purple"
+    ],
+
+    navigator: {
+      series: {
+        color: "maroon"
+      },
+
+      yAxis: {
+
+      }
+    },
+
+    rangeSelector: {
+      buttons: [
+        { type: 'minute',
+          count: 60,
+          text: '1h' },
+        { type: 'minute',
+          count: 60*8,
+          text: '8h' },
+        { type: 'day',
+          count: 1,
+          text: '1d' },
+        { type: 'all',
+          text: 'All' }
+      ],
+      inputEnabled: false,
+      selected: 3
+    },
+
+    scrollbar: {
+      enabled: false
+    },
+
+    series: [{
+      name: 'BTC to USD',
+      data: data
+    }]
+  });
+
+  $('#chart').click(function(e) {
+    var chart  = $('#container').highcharts(),
+        i      = 0,
+        series = chart.series[0];
+    data = usdeur.splice(0, 100);
+    for (i; i < data.length; i++) {
+      series.addPoint(data[i], false);
+    }
+    chart.redraw();
+  });
+
+
+  // track current data
   var socket = io.connect(window.location);
   socket.on('tick', function (data) {
     var $currPriceH1 = $('#curr-price');

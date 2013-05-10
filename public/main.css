@@ -27,6 +27,11 @@ h3 {
   text-align: center;
 }
 
+#chart {
+  height: 400px;
+  min-width: 600px
+}
+
 ul#prices {
   margin: 0 auto;
   width: 80%;
