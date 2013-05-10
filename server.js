@@ -1,4 +1,5 @@
-var app     = require('express')(),
+var express = require('express'),
+    app     = express(),
     server  = require('http').createServer(app),
     io      = require('socket.io').listen(server),
     mtgox   = require('node-mtgox-client-streaming'),
@@ -11,9 +12,7 @@ if (!process.env.MTGOX_API_KEY || !process.env.MTGOX_API_SECRET) {
 
 // set up the web server and socket.io
 server.listen(8080);
-app.get('/', function (req, res) {
-  res.sendfile(__dirname + '/index.html');
-});
+app.use(express.static(__dirname + '/public'));
 // io.sockets.on('connection', function (socket) {
 //   // do this whenever a client connects
 // });

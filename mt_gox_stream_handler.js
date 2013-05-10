@@ -13,14 +13,16 @@ MtGoxStreamHandler.prototype = {
   _init: function() {
     if (this._redisClient()) {
       var runningStats = this.runningStats;
+      var io = this.io;
       // pull values out of redis and add them to our running statistics
       this._redisClient().lrange('mtgox:ticks', 0, 24999, function(error, ticks) {
         if (error) {
           throw error;
         } else {
           for (var i in ticks) {
-            var price = JSON.parse(ticks[i]).v;
-            runningStats.push(price);
+            var dp = JSON.parse(ticks[i]);
+            runningStats.push(dp.v);
+            io.sockets.emit('historic', dp);
           }
         }
       });

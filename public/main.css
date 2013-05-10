@@ -1,0 +1,74 @@
+/* MOBILE FIRST! */
+body {
+  width: 95%;
+  margin: 0 auto;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: white;
+  background: black;
+}
+
+h1 {
+  color: yellow;
+  font-size: 20pt;
+  width: 100%;
+  text-align: center;
+}
+
+h2 {
+  font-size: 16pt;
+  width: 100%;
+  text-align: center;
+}
+
+h3 {
+  font-size: 12pt;
+  font-weight: normal;
+  width: 100%;
+  text-align: center;
+}
+
+ul#prices {
+  margin: 0 auto;
+  width: 80%;
+  columns: 100px 2;
+  -webkit-columns: 100px 2;
+  -moz-columns: 100px 2;
+}
+
+ul#prices li {
+  list-style-type: none;
+}
+
+span.price {
+  color: aqua;
+}
+
+/* DESKTOP  / TABLET */
+@media (min-width:500px) {
+  body {
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 40pt;
+  }
+
+  h2 {
+    font-size: 32pt;
+  }
+
+  h3 {
+    font-size: 16pt;
+  }
+
+  div#curr-price {
+    font-size: 40pt;
+  }
+
+  ul#prices {
+    columns: 100px 5;
+    -webkit-columns: 100px 5;
+    -moz-columns: 100px 5;
+  }
+}      
