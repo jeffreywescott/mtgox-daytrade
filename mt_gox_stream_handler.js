@@ -7,11 +7,11 @@ var MtGoxStreamHandler = function(mtGoxClient, io) {
   this.io = io;
   this.runningStats = new stats.RunningStats();
   this.runningStats.ready = false;
-  this._init();
+  this._initStats();
 }
 
 MtGoxStreamHandler.prototype = {
-  _init: function() {
+  _initStats: function() {
     if (this._redisClient()) {
       var runningStats = this.runningStats;
       var io = this.io;
@@ -21,9 +21,11 @@ MtGoxStreamHandler.prototype = {
       var initStats = function() {
         redis.lrange('mtgox:ticks', 0, 24999, function(error, ticks) {
           if (error) {
+            console.log("ERROR:", error);
             // try again in 3 seconds
             setTimeout(initStats, 3000);
           } else {
+            console.log("INFO: Setting up running stats using previously recorded data.");
             for (var i in ticks) {
               var dp = JSON.parse(ticks[i]);
               runningStats.push(dp.v);
@@ -34,17 +36,24 @@ MtGoxStreamHandler.prototype = {
         });
       }
       initStats();
+    } else {
+      var self = this;
+      setTimeout(function() { self._initStats() }, 500);
     }
   },
 
   _redisClient: function() {
-    if (!process.env.REDIS_HOST || !process.env.REDIS_PORT || !process.env.REDIS_AUTH) {
-      console.log("WARNING: REDIS_HOST, REDIS_PORT, and REDIS_AUTH are not set -- not saving ticks!");
+    if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {
+      console.log("WARNING: REDIS_HOST and REDIS_PORT are not both set -- using localhost!");
+      process.env.REDIS_HOST = "localhost";
+      process.env.REDIS_PORT = "6379";
     } else {
       if (!this.__redisClient) {
         // be sure to handle re-authorization
         this.__redisClient = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
-        this.__redisClient.auth(process.env.REDIS_AUTH);
+        if (process.env.REDIS_AUTH) {
+          this.__redisClient.auth(process.env.REDIS_AUTH);
+        }
       }
     }
     
@@ -57,12 +66,16 @@ MtGoxStreamHandler.prototype = {
       var redis = this._redisClient();
       // only write the tick if it's newer than the latest tick already stored
       this._redisClient().lindex("mtgox:ticks", 0, function(err, json) {
-        var firstTick = JSON.parse(json);
-        if (dp.t > firstTick.t) {
-          redis.lpush("mtgox:ticks", JSON.stringify(dp));
-          redis.ltrim("mtgox:ticks", 0, 25000);
+        if (err) {
+          console.log("ERROR:", err);
         } else {
-          console.log("DEBUG: not saving datapoint since it's older than the last one saved.");
+          var lastTick = JSON.parse(json);
+          if (!lastTick || dp.t > lastTick.t) { // if there was no lastTick, this is the first tick ever recorded
+            redis.lpush("mtgox:ticks", JSON.stringify(dp));
+            redis.ltrim("mtgox:ticks", 0, 25000);
+          } else {
+            console.log("DEBUG: not saving datapoint since it's older than the last one saved.");
+          }
         }
       });
     } else {
@@ -100,6 +113,8 @@ MtGoxStreamHandler.prototype = {
     this.saveTick(dp);
     dp.mean = this.runningStats.mean();
     dp.stdDev = this.runningStats.stdDev();
+    dp.low = this.runningStats.low;
+    dp.high = this.runningStats.high;
     this.io.sockets.emit('tick', dp);
     console.log("current: $" + dp.v + ", mean: $" + dp.mean + ", stdDev: $" + dp.stdDev);
   },
