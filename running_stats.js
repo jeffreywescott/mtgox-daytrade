@@ -10,7 +10,7 @@ RunningStats.prototype = {
     this.oldSum = this.newSum = 0.0;
     this.oldMean = this.newMean = 0.0;
     this.high = 0.0;
-    this.low = 0.0;
+    this.low = Number.MAX_VALUE;
   },
 
   push: function(val) {
