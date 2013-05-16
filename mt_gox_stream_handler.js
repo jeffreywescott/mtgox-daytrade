@@ -40,14 +40,14 @@ MtGoxStreamHandler.prototype = {
   _redisClient: function() {
     if (!process.env.REDIS_HOST || !process.env.REDIS_PORT || !process.env.REDIS_AUTH) {
       console.log("WARNING: REDIS_HOST, REDIS_PORT, and REDIS_AUTH are not set -- not saving ticks!");
+    } else {
+      if (!this.__redisClient) {
+        // be sure to handle re-authorization
+        this.__redisClient = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
+        this.__redisClient.auth(process.env.REDIS_AUTH);
+      }
     }
-
-    if (!this.__redisClient) {
-      // be sure to handle re-authorization
-      this.__redisClient = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
-      this.__redisClient.auth(process.env.REDIS_AUTH);
-    }
-
+    
     return this.__redisClient;
   },
 
