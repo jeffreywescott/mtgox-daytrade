@@ -1,30 +1,19 @@
 $(document).ready(function () {
 
   // draw chart
-  var data = usdeur.splice(0, 500);
+  //Highcharts.setOptions({ global : { useUTC : false } });
   $('#chart').highcharts('StockChart', {
     chart: {
       backgroundColor: "#222",
       shadow: true
     },
 
-    colors: [
-      "aqua",
-      "fuchsia",
-      "blue",
-      "white",
-      "teal",
-      "purple"
-    ],
+    colors: [ "aqua", "fuchsia", "blue", "white", "teal", "purple" ],
 
     navigator: {
       series: {
         color: "maroon"
       },
-
-      yAxis: {
-
-      }
     },
 
     rangeSelector: {
@@ -51,36 +40,30 @@ $(document).ready(function () {
 
     series: [{
       name: 'BTC to USD',
-      data: data
+      data: []
     }]
   });
-
-  $('#chart').click(function(e) {
-    var chart  = $('#container').highcharts(),
-        i      = 0,
-        series = chart.series[0];
-    data = usdeur.splice(0, 100);
-    for (i; i < data.length; i++) {
-      series.addPoint(data[i], false);
-    }
-    chart.redraw();
-  });
-
 
   // track current data
   var socket = io.connect(window.location);
   socket.on('tick', function (data) {
-    var $currPriceH1 = $('#curr-price');
-    var $meanStdDevDiv = $('#mean-stddev');
-    var $currPriceSpan = $currPriceH1.find('span.price');
-    var $pricesList = $('ul#prices');
-    var prevPrice = parseFloat($currPriceSpan.text().substring(1)); // remove $
-    var prevColor = $currPriceSpan.css('color');
-    var currPrice = parseFloat(data.v);
-    var mean = parseFloat(data.mean);
-    var stdDev = parseFloat(data.stdDev);
-    var priceTemplate = '<span class="price"></span>';
-    var currColor = 'aqua';
+    var $currPriceH1 = $('#curr-price'),
+        $meanStdDevDiv = $('#mean-stddev'),
+        $currPriceSpan = $currPriceH1.find('span.price'),
+        $pricesList = $('ul#prices'),
+        prevPrice = parseFloat($currPriceSpan.text().substring(1)), // remove $
+        prevColor = $currPriceSpan.css('color'),
+        currPrice = parseFloat(data.v),
+        mean = parseFloat(data.mean),
+        stdDev = parseFloat(data.stdDev),
+        priceTemplate = '<span class="price"></span>',
+        currColor = 'aqua',
+        chart  = $('#chart').highcharts(),
+        series = chart.series[0];
+
+    // add the current price to the chart
+    series.addPoint([data.t, currPrice], false);
+
     if (prevPrice) {
       if (currPrice > prevPrice) {
         currColor = 'green';
@@ -100,4 +83,10 @@ $(document).ready(function () {
     // prune the list to 100 items (which works well for both 2 and 5 columns)
     $pricesList.find('li:gt(' + 99 + ')').remove();
   });
+
+  (function redrawChart() {
+    console.log('redrawing ...');
+    setTimeout(redrawChart, 5000);
+    $('#chart').highcharts().redraw();
+  })();
 });
