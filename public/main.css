@@ -44,8 +44,7 @@ h3 {
 }
 
 #chart {
-  height: 400px;
-  min-width: 600px
+  display: none;
 }
 
 ul#prices {
@@ -85,6 +84,12 @@ span.price {
 
   div#curr-price {
     font-size: 40pt;
+  }
+
+  #chart {
+    display: block;
+    height: 400px;
+    min-width: 600px
   }
 
   ul#prices {
