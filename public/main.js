@@ -44,6 +44,11 @@ $(document).ready(function () {
     }]
   });
 
+
+  function toMoney(v) {
+    return Math.round(parseFloat(v)*100)/100;
+  }
+
   // track current data
   var socket = io.connect(window.location);
   socket.on('tick', function (data) {
@@ -51,11 +56,11 @@ $(document).ready(function () {
         $meanStdDevDiv = $('#mean-stddev'),
         $currPriceSpan = $currPriceH1.find('span.price'),
         $pricesList = $('ul#prices'),
-        prevPrice = parseFloat($currPriceSpan.text().substring(1)), // remove $
+        prevPrice = toMoney($currPriceSpan.text().substring(1)), // remove $
         prevColor = $currPriceSpan.css('color'),
-        currPrice = parseFloat(data.v),
-        mean = parseFloat(data.mean),
-        stdDev = parseFloat(data.stdDev),
+        currPrice = toMoney(data.v),
+        mean = toMoney(data.mean),
+        stdDev = toMoney(data.stdDev),
         priceTemplate = '<span class="price"></span>',
         currColor = 'aqua',
         chart  = $('#chart').highcharts(),
