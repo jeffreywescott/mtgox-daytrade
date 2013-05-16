@@ -9,6 +9,8 @@ RunningStats.prototype = {
     this.numValues = 0;
     this.oldSum = this.newSum = 0.0;
     this.oldMean = this.newMean = 0.0;
+    this.high = 0.0;
+    this.low = 0.0;
   },
 
   push: function(val) {
@@ -25,6 +27,9 @@ RunningStats.prototype = {
       this.oldMean = this.newMean;
       this.oldSum = this.newSum;
     }
+
+    if (val > this.high) { this.high = val; }
+    if (val < this.low) { this.low = val; }
   },
 
   mean: function() {
@@ -38,6 +43,7 @@ RunningStats.prototype = {
   stdDev: function() {
     return Math.sqrt( this.variance() );
   }
+
 };
 
 exports.RunningStats = RunningStats;
