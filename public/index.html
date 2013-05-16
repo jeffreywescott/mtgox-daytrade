@@ -12,7 +12,14 @@
   <body>
     <h1>BTC vs USD</h1>
     <h2 id="curr-price"></h2>
-    <h3 id="mean-stddev"></h3>
+    <table id="stats">
+      <tr>
+        <td>Mean:</td><td id="stats-mean"></td><td>StdDev:</td><td id="stats-stddev"></td>
+      </tr>        
+      <tr>
+        <td>Low:</td><td id="stats-low"></td><td>High:</td><td id="stats-high"></td>
+      </tr>        
+    </table>
     <div id="chart"></div>
 
     <h3>Last 100 Prices</h3>

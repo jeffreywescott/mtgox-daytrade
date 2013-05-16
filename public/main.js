@@ -53,7 +53,10 @@ $(document).ready(function () {
   var socket = io.connect(window.location);
   socket.on('tick', function (data) {
     var $currPriceH1 = $('#curr-price'),
-        $meanStdDevDiv = $('#mean-stddev'),
+        $statsMeanCell = $('#stats-mean'),
+        $statsStdDevCell = $('#stats-stddev'),
+        $statsLowCell = $('#stats-low'),
+        $statsHighCell = $('#stats-high'),
         $currPriceSpan = $currPriceH1.find('span.price'),
         $pricesList = $('ul#prices'),
         prevPrice = toMoney($currPriceSpan.text().substring(1)), // remove $
@@ -61,6 +64,8 @@ $(document).ready(function () {
         currPrice = toMoney(data.v),
         mean = toMoney(data.mean),
         stdDev = toMoney(data.stdDev),
+        low = toMoney(data.low),
+        high = toMoney(data.high),
         priceTemplate = '<span class="price"></span>',
         currColor = 'aqua',
         chart  = $('#chart').highcharts(),
@@ -82,7 +87,10 @@ $(document).ready(function () {
       $pricesList.prepend('<li>' + priceTemplate + '</li>').find('li:first span.price').html('$' + prevPrice).css('color', prevColor);
     }
     $currPriceH1.html(priceTemplate).find('span.price').html('$' + currPrice).css('color', currColor);
-    $meanStdDevDiv.html('($' + mean + ' +/- $' + stdDev + ')');
+    $statsMeanCell.text('$'+mean);
+    $statsStdDevCell.text('$'+stdDev);
+    $statsLowCell.text('$'+low);
+    $statsHighCell.text('$'+high);
     if (currColor != 'aqua') { $currPriceH1.find('span.price').effect("highlight", {}, 500); }
 
     // prune the list to 100 items (which works well for both 2 and 5 columns)

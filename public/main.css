@@ -27,6 +27,22 @@ h3 {
   text-align: center;
 }
 
+#stats {
+  margin: 0 auto;
+}
+
+#stats td:nth-child(odd) {
+  font-weight: bold;
+}
+
+#stats td:nth-child(3) {
+  padding-left: 30px;
+}
+
+#stats td {
+  text-align: right;
+}
+
 #chart {
   height: 400px;
   min-width: 600px
