@@ -6,6 +6,7 @@ var MtGoxStreamHandler = function(mtGoxClient, io) {
   this.mtGoxClient = mtGoxClient;
   this.io = io;
   this.runningStats = new stats.RunningStats();
+  this.runningStats.ready = false;
   this._init();
 }
 
@@ -14,18 +15,25 @@ MtGoxStreamHandler.prototype = {
     if (this._redisClient()) {
       var runningStats = this.runningStats;
       var io = this.io;
+      var redis = this._redisClient();
+
       // pull values out of redis and add them to our running statistics
-      this._redisClient().lrange('mtgox:ticks', 0, 24999, function(error, ticks) {
-        if (error) {
-          throw error;
-        } else {
-          for (var i in ticks) {
-            var dp = JSON.parse(ticks[i]);
-            runningStats.push(dp.v);
-            io.sockets.emit('historic', dp);
+      var initStats = function() {
+        redis.lrange('mtgox:ticks', 0, 24999, function(error, ticks) {
+          if (error) {
+            // try again in 3 seconds
+            setTimeout(initStats, 3000);
+          } else {
+            for (var i in ticks) {
+              var dp = JSON.parse(ticks[i]);
+              runningStats.push(dp.v);
+              io.sockets.emit('historic', dp);
+            }
+            runningStats.ready = true;
           }
-        }
-      });
+        });
+      }
+      initStats();
     }
   },
 
@@ -35,16 +43,16 @@ MtGoxStreamHandler.prototype = {
     }
 
     if (!this.__redisClient) {
+      // be sure to handle re-authorization
       this.__redisClient = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
-      this.__redisClient.auth(process.env.REDIS_AUTH, function (err) {
-       if (err) { throw err; }
-      });
+      this.__redisClient.auth(process.env.REDIS_AUTH);
     }
 
     return this.__redisClient;
   },
 
   saveTick: function(dp) {
+    // save to redis
     if (this._redisClient()) {
       var redis = this._redisClient();
       // only write the tick if it's newer than the latest tick already stored
@@ -60,6 +68,13 @@ MtGoxStreamHandler.prototype = {
     } else {
       console.log("WARNING: _redisClient() not defined, unable to save tick.");
     }
+
+    // add to running statistics
+    if (this.runningStats.ready) {
+      this.runningStats.push(dp.v);
+    } else {
+      console.log("WARNING: runningStats not yet ready, tick not added to stats.");
+    }    
   },
 
   private: function(data) {
@@ -83,7 +98,6 @@ MtGoxStreamHandler.prototype = {
     var ltv = parseFloat(data.ticker.last.value);
     var dp = { t: (new Date()).getTime(), v: ltv };
     this.saveTick(dp);
-    this.runningStats.push(dp.v);
     dp.mean = this.runningStats.mean();
     dp.stdDev = this.runningStats.stdDev();
     this.io.sockets.emit('tick', dp);
