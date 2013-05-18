@@ -8,37 +8,39 @@ var MtGoxStreamHandler = function(mtGoxClient, io) {
   this.runningStats = new stats.RunningStats();
   this.runningStats.ready = false;
   this._initStats();
+  this.__numRedisErrors = 0;
 }
 
 MtGoxStreamHandler.prototype = {
   _initStats: function() {
-    if (this._redisClient()) {
-      var runningStats = this.runningStats;
-      var io = this.io;
-      var redis = this._redisClient();
+    var self = this;
 
-      // pull values out of redis and add them to our running statistics
-      var initStats = function() {
-        redis.lrange('mtgox:ticks', 0, 24999, function(error, ticks) {
-          if (error) {
+    // pull values out of redis and add them to our running statistics
+    var initStats = function(numAttempts) {
+      self._redisClient().lrange('mtgox:ticks', 0, 24999, function(error, ticks) {
+        if (error) {
+          if (numAttempts < 10) {
             console.log("ERROR:", error);
-            // try again in 3 seconds
-            setTimeout(initStats, 3000);
+            setTimeout(function() { initStats(numAttempts+1) }, 3000);
           } else {
-            console.log("INFO: Setting up running stats using previously recorded data.");
-            for (var i in ticks) {
-              var dp = JSON.parse(ticks[i]);
-              runningStats.push(dp.v);
-              io.sockets.emit('historic', dp);
-            }
-            runningStats.ready = true;
+            throw "ERROR: failed 10 times trying to initialize stats -- " + error;
           }
-        });
-      }
-      initStats();
+        } else {
+          console.log("INFO: Setting up running stats using previously recorded data.");
+          for (var i in ticks) {
+            var dp = JSON.parse(ticks[i]);
+            self.runningStats.push(dp.v);
+            self.io.sockets.emit('historic', dp);
+          }
+          self.runningStats.ready = true;
+        }
+      });
+    }
+
+    if (self._redisClient()) {
+      initStats(0);
     } else {
-      var self = this;
-      setTimeout(function() { self._initStats() }, 500);
+      setTimeout(function() { initStats(0) }, 3000);
     }
   },
 
@@ -54,6 +56,16 @@ MtGoxStreamHandler.prototype = {
         if (process.env.REDIS_AUTH) {
           this.__redisClient.auth(process.env.REDIS_AUTH);
         }
+
+        var self = this;
+        this.__redisClient.on("error", function (err) {
+          if (self.__numRedisErrors < 3) {
+            self.__numRedisErrors++;
+            console.log("ERROR: unhandled redis error --", err);
+          } else {
+            throw "ERROR: 10 redis failures exceeded -- " + err;
+          }
+        });
       }
     }
     

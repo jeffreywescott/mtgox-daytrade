@@ -11,7 +11,7 @@ if (!process.env.MTGOX_API_KEY || !process.env.MTGOX_API_SECRET) {
 }
 
 // set up the web server and socket.io
-server.listen(8080);
+server.listen(8282);
 app.use(express.static(__dirname + '/public'));
 // io.sockets.on('connection', function (socket) {
 //   // do this whenever a client connects
