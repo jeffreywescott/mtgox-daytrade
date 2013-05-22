@@ -59,11 +59,11 @@ MtGoxStreamHandler.prototype = {
 
         var self = this;
         this.__redisClient.on("error", function (err) {
-          if (self.__numRedisErrors < 3) {
+          if (self.__numRedisErrors < 50) {
             self.__numRedisErrors++;
             console.log("ERROR: unhandled redis error --", err);
           } else {
-            throw "ERROR: 10 redis failures exceeded -- " + err;
+            throw "ERROR: 50 redis failures exceeded -- " + err;
           }
         });
       }
